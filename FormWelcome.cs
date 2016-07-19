@@ -15,6 +15,8 @@ namespace مكتبة_الوقفية
         public FormWelcome()
         {
             InitializeComponent();
+            var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            Text += " " + ver.Major + "." + ver.Minor;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -57,7 +59,13 @@ namespace مكتبة_الوقفية
             MessageBox.Show(this, "بسم الله الرحمن الرحيم\n الحمد لله الذي بنعمته تتم الصالحات، وصلى الله على نبينا محمد.\n\n" +
                 "في عام 1433هـ قام الدكتور بقسم علوم الحاسب/ وائل الكيلاني بتكليف الطالب/ إبراهيم الكيلاني بعمل أداة تحميل ومزامنة للمكتبة الوقفية ليتمكن الدكتور من (تحميل جميع الكتب الجديدة من المكتبة بضغطة واحدة) كما قال. وتم عمل والحمد لله نسخة مبدئية منه في رمضان 1433هـ ثم وفَّق الله بنشره للمسلمين لينتفعوا به عام 1436هـ و تم أيضا إضافة بعض التحسينات"
                  + "\n\nشكر خاص لـ م/عمر أيمن على مساعداته التقنية"
-                 + "\n\nهذا البرنامج مفتوح المصدر. يمكنك تحميل الكود المصدري من خلال الفيديو الخاص به على يوتوب", "حول", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.RightAlign);
+                 + "\n\nهذا البرنامج مفتوح المصدر. يمكنك المشاركة في تطويره عبر الكود المصدري الموجود على الفيديو الخاص به على يوتوب", "حول", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.RightAlign);
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            using (var f = new FormContact())
+                f.ShowDialog(this);
         }
     }
 }

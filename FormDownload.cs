@@ -106,7 +106,8 @@ namespace مكتبة_الوقفية
             (from k in original
              join j in updated on k.Id.ToString() equals j.Name
              where k.Order != (long)j.Tag
-             select new { k, j }).ToList().ForEach(k => k.k.Order = (long)k.j.Tag);
+             select new { k, j })
+             .ToList().ForEach(k => k.k.Order = (long)k.j.Tag);
         }
 
         private void wait(object ox)
@@ -165,6 +166,8 @@ namespace مكتبة_الوقفية
                                 {
                                     if (j.Error == null)
                                         ++completed;
+                                    else if (File.Exists(file))
+                                        File.Delete(file);
                                     pulse(ox);
                                 }
                             };
@@ -194,9 +197,18 @@ namespace مكتبة_الوقفية
                                     file = getFile(dir, item.Urls[idxUrl]);
                                     if (!File.Exists(file))// if user stops before all Urls complete
                                     {
-                                        client.DownloadFileAsync(new Uri(item.Urls[idxUrl]), file);
+                                        try
+                                        {
+                                            client.DownloadFileAsync(new Uri(item.Urls[idxUrl]), file);
+                                        }
+                                        catch
+                                        {
+                                            continue;
+                                        }
                                         wait(ox);
-                                        if (started.Data) // download completed
+                                        if (!File.Exists(file)) // some error happened ??
+                                            continue;
+                                        else if (started.Data) // download completed
                                             item.Status = string.Format("اكتمل {0} من {1}", completed, item.Urls.Length);
                                         else client.CancelAsync(); // user has cancelled
                                     }

@@ -312,23 +312,32 @@ namespace مكتبة_الوقفية
                     for (int j = myStart; j < myEnd; j++)
                     {
                         var client = new WebClient();
-                        client.Encoding = Encoding.GetEncoding("windows-1256");
-                        string s = null;
-                        using (var data = client.OpenRead(categories[j].Pages[0]))
-                        using (var reader = new StreamReader(data, Encoding.GetEncoding("windows-1256"), true))
-                            s = reader.ReadToEnd();
-                        var regex2 = new Regex(string.Concat("<A href[=]\'category[.]php[?]cid[=]",
-                            this.categories[j].Id, "[&]st=[0-9]+\'><U>[0-9]+</U></A>"), RegexOptions.IgnoreCase);
-                        var matchCollections2 = regex2.Matches(s);
-                        for (int i = 0; i < matchCollections2.Count; i++)
+                        try
                         {
-                            var num = matchCollections2[i].Value.IndexOf("href='") + "href='".Length;
-                            int num2 = matchCollections2[i].Value.IndexOf('\'', num + 1);
-                            string str = matchCollections2[i].Value.Substring(num, num2 - num);
-                            //str = str.Remove(str.IndexOf("amp;"), 4);
-                            categories[j].Pages.Add(string.Concat("http://www.waqfeya.com/", str));
+                            client.Encoding = Encoding.GetEncoding("windows-1256");
+                            string s = null;
+                            using (var data = client.OpenRead(categories[j].Pages[0]))
+                            using (var reader = new StreamReader(data, Encoding.GetEncoding("windows-1256"), true))
+                                s = reader.ReadToEnd();
+                            var regex2 = new Regex(string.Concat("<A href[=]\'category[.]php[?]cid[=]",
+                                this.categories[j].Id, "[&]st=[0-9]+\'><U>[0-9]+</U></A>"), 
+                                RegexOptions.IgnoreCase);
+                            var matchCollections2 = regex2.Matches(s);
+                            for (int i = 0; i < matchCollections2.Count; i++)
+                            {
+                                var num = matchCollections2[i].Value.IndexOf("href='") + "href='".Length;
+                                int num2 = matchCollections2[i].Value.IndexOf('\'', num + 1);
+                                string str = matchCollections2[i].Value.Substring(num, num2 - num);
+                                //str = str.Remove(str.IndexOf("amp;"), 4);
+                                categories[j].Pages.Add(string.Concat("http://www.waqfeya.com/", str));
+                            }
+                            this.callback(0, string.Concat("تم استكشاف الصفحات لقسم ", this.categories[j].Name));
                         }
-                        this.callback(0, string.Concat("تم استكشاف الصفحات لقسم ", this.categories[j].Name));
+                        catch
+                        {
+                            // ignore for now
+                        }
+                        client.Dispose();
                     }
                 }, th);
             }
@@ -355,32 +364,40 @@ namespace مكتبة_الوقفية
                         for (int k = 0; k < cat.Pages.Count; k++)
                         {
                             var client = new WebClient();
-                            client.Encoding = Encoding.GetEncoding("windows-1256");
-                            string s = null;
-                            using (var data = client.OpenRead(cat.Pages[k]))
-                            using (var reader = new StreamReader(data, Encoding.GetEncoding("windows-1256"), true))
-                                s = reader.ReadToEnd();
-                            var regex = new Regex("(<A title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\' href[=]\'[^\']+\'>[^\']+</A>)"
-                            + "|(<A href[=]\'[^\']+\' title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\'>[^\']+</A>)",
-                            RegexOptions.IgnoreCase);
-                            var matchCollections = regex.Matches(s);
-                            List<int> nums = new List<int>();
-                            var i = 0;
-                            while (true)
+                            try
                             {
-                                int num3 = s.IndexOf("عنوان الكتاب", i);
-                                i = num3;
-                                if (num3 < 0)
+                                client.Encoding = Encoding.GetEncoding("windows-1256");
+                                string s = null;
+                                using (var data = client.OpenRead(cat.Pages[k]))
+                                using (var reader = new StreamReader(data, Encoding.GetEncoding("windows-1256"), true))
+                                    s = reader.ReadToEnd();
+                                var regex = new Regex("(<A title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\' href[=]\'[^\']+\'>[^\']+</A>)"
+                                + "|(<A href[=]\'[^\']+\' title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\'>[^\']+</A>)",
+                                RegexOptions.IgnoreCase);
+                                var matchCollections = regex.Matches(s);
+                                List<int> nums = new List<int>();
+                                var i = 0;
+                                while (true)
                                 {
-                                    break;
+                                    int num3 = s.IndexOf("عنوان الكتاب", i);
+                                    i = num3;
+                                    if (num3 < 0)
+                                    {
+                                        break;
+                                    }
+                                    int num4 = i;
+                                    i = num4 + 1;
+                                    nums.Add(num4);
                                 }
-                                int num4 = i;
-                                i = num4 + 1;
-                                nums.Add(num4);
+                                this.addBooksInCurrentCategory(cat, matchCollections, nums, s);
+                                callback(0, string.Concat(new object[] { "تم استكشاف الكتب في الصفحة ",
+                                    k + 1, " من قسم ", cat.Name }));
                             }
-                            this.addBooksInCurrentCategory(cat, matchCollections, nums, s);
-                            callback(0, string.Concat(new object[] { "تم استكشاف الكتب في الصفحة ",
-                            k + 1, " من قسم ", cat.Name }));
+                            catch
+                            {
+                                // ignore
+                            }
+                            client.Dispose();
                         }
                     }
                 }, th);
@@ -411,26 +428,33 @@ namespace مكتبة_الوقفية
                             if (!isFileLink(book.URLs[k]))
                             {
                                 string s = null;
-                                using (var client = new WebClient())
+                                try
                                 {
-                                    client.Encoding = Encoding.GetEncoding("windows-1256");
-                                    using (var data = client.OpenRead(book.URLs[k]))
-                                    using (var reader = new StreamReader(data, Encoding.GetEncoding("windows-1256"), true))
-                                        s = reader.ReadToEnd();
+                                    using (var client = new WebClient())
+                                    {
+                                        client.Encoding = Encoding.GetEncoding("windows-1256");
+                                        using (var data = client.OpenRead(book.URLs[k]))
+                                        using (var reader = new StreamReader(data, Encoding.GetEncoding("windows-1256"), true))
+                                            s = reader.ReadToEnd();
+                                    }
+                                    var regex = new Regex("(<A title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\' href[=]\'[^\']+\'>[^\']+</A>)"
+                                        + "|(<A href[=]\'[^\']+\' title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\'>[^\']+</A>)",
+                                        RegexOptions.IgnoreCase);
+                                    var matchCollections = regex.Matches(s);
+                                    book.URLs.RemoveAt(k--);
+                                    for (int i = 0; i < matchCollections.Count; i++)
+                                    {
+                                        string value = matchCollections[i].Value;
+                                        var num = value.IndexOf("href='") + "href='".Length;
+                                        var url = value.Substring(num, Math.Min(value.IndexOf('>', num) - 1, value.IndexOf('\'', num)) - num);
+                                        if (url.StartsWith("/"))
+                                            url = "http://www.waqfeya.com" + url;
+                                        book.URLs.Add(url);
+                                    }
                                 }
-                                var regex = new Regex("(<A title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\' href[=]\'[^\']+\'>[^\']+</A>)"
-                                    + "|(<A href[=]\'[^\']+\' title[=]\'اضغط على الرابط وانتظر قليلاً لحين الاتصال بالسيرفر\'>[^\']+</A>)",
-                                    RegexOptions.IgnoreCase);
-                                var matchCollections = regex.Matches(s);
-                                book.URLs.RemoveAt(k--);
-                                for (int i = 0; i < matchCollections.Count; i++)
+                                catch
                                 {
-                                    string value = matchCollections[i].Value;
-                                    var num = value.IndexOf("href='") + "href='".Length;
-                                    var url = value.Substring(num, Math.Min(value.IndexOf('>', num) - 1, value.IndexOf('\'', num)) - num);
-                                    if (url.StartsWith("/"))
-                                        url = "http://www.waqfeya.com" + url;
-                                    book.URLs.Add(url);
+                                    // ignore
                                 }
                             }
                         }

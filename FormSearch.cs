@@ -93,7 +93,8 @@ namespace مكتبة_الوقفية
                         using (var response = (HttpWebResponse)request.GetResponse())
                         using (var str = new StreamReader(response.GetResponseStream(), encoding))
                             html = str.ReadToEnd();
-                        if (html.Contains("لم يُعثر على أية نتائج، جرب كلمات أخرى للبحث!") || html.Contains("لا توجد نتائج"))
+                        if (html.Contains("لم يُعثر على أية نتائج، جرب كلمات أخرى للبحث!") 
+                            || html.Contains("لا توجد نتائج"))
                             break;
                         parseHtml(html);
                         st += 15;

@@ -172,6 +172,7 @@
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.Location = new System.Drawing.Point(0, 25);
             this.listView1.Name = "listView1";
+            this.listView1.RightToLeftLayout = true;
             this.listView1.Size = new System.Drawing.Size(536, 344);
             this.listView1.TabIndex = 2;
             this.listView1.UseCompatibleStateImageBehavior = false;
