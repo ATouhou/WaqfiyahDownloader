@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ar">
+<head>
+	<script src="jquery.min.js"> </script>
+	<title>تحميل المكتبة الوقفية</title>
+	<meta charset="utf-8" />
+</head>
+<body dir="rtl" style="direction: rtl">
+	<div id="status">
+		يجري الآن تحويلك لصفحة التحميل، الرجاء الانتظار...
+	</div>
+<script>
+	$(function() {	
+		$.getJSON("http://api.github.com/repos/Mr-DDDAlKilanny/WaqfiyahDownloader/releases/latest", 
+			function(json) {
+			//debugger;
+			if (json) {
+				var link = json.assets[0].browser_download_url;
+				document.location = link;
+				$("div").html("<a href='" + link + "'>اضغط هنا للتحميل</a>");
+			} else {
+				$("#status").html("عذرا، فشل التحميل. حاول لاحقا");
+			}
+		});
+	});
+</script>
+</body>
+</html>
