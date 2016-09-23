@@ -11,6 +11,9 @@ namespace مكتبة_الوقفية
 		private readonly static List<char> invalidPathChars;
         public static readonly Settings Setting;
 
+        public static bool Updated { get; private set; }
+
+
 		static Program()
 		{
             Setting = Settings.Load() ?? new Settings();
@@ -25,8 +28,11 @@ namespace مكتبة_الوقفية
         }
 
 		[STAThread]
-		private static void Main()
+		private static void Main(string[] args)
 		{
+            foreach (var item in args)
+                if (item == "--updated")
+                    Updated = true;
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new FormWelcome());

@@ -155,7 +155,8 @@ namespace مكتبة_الوقفية
                 tmp = html.IndexOf("<li>", tmp) + 4;
                 b.Author = getString(html.Substring(tmp, html.IndexOf("</li>", tmp) - tmp));
                 idx = html.IndexOf("</ul>", tmp);
-                while ((tmp = html.IndexOf("لحين الاتصال", tmp)) >= 0)
+                var nextIdx = html.IndexOf(search, idx);
+                while ((tmp = html.IndexOf("لحين الاتصال", tmp)) >= 0 && (nextIdx < 0 || tmp < nextIdx))
                 {
                     int temp = html.LastIndexOf("href", tmp);
                     temp += 6;
@@ -282,6 +283,12 @@ namespace مكتبة_الوقفية
             checkProgramatically = true;
             checkAll(e.Node, e.Node.Checked);
             checkProgramatically = false;
+        }
+
+        private void textBox1_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                button1_Click(sender, e);
         }
     }
 
